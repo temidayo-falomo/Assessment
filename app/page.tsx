@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/table";
 import React, { useCallback, useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 interface Character {
   name: string;
@@ -37,6 +39,8 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const { toast } = useToast();
+
   const fetchCharacters = async (searchQ: string) => {
     setIsLoading(true);
     const response = await fetch(`${SWAPI_URL}?search=${searchQ}`);
@@ -51,7 +55,15 @@ export default function Home() {
   );
 
   useEffect(() => {
-    fetchCharacters("");
+    fetchCharacters("").catch(() => {
+      //
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your request.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+    });
   }, []);
 
   return (
