@@ -34,8 +34,8 @@ export default function Home() {
   const SWAPI_URL = "https://swapi.dev/api/people";
 
   const [characters, setCharacters] = useState<Character[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchCharacters = async (searchQ: string) => {
     setIsLoading(true);
@@ -108,9 +108,7 @@ export default function Home() {
                   {characters?.map((data, index) => (
                     <TableRow
                       key={index}
-                      className={`border-gray-100 text-gray-700 ${
-                        index % 2 === 0 ? "bg-gray-" : ""
-                      }`}
+                      className="border-gray-100 text-gray-700"
                     >
                       <TableCell className="font-medium">{data.name}</TableCell>
                       <TableCell>{data.height}</TableCell>
