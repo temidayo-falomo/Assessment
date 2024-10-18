@@ -1,101 +1,139 @@
-import Image from "next/image";
+"use client";
+
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import React, { useCallback, useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface Character {
+  name: string;
+  height: string;
+  birth_year: string;
+}
+
+const debounce = <T extends (...args: Parameters<T>) => void>(
+  func: T,
+  wait: number
+) => {
+  let timeout: ReturnType<typeof setTimeout>;
+
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const SWAPI_URL = "https://swapi.dev/api/people";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchCharacters = async (searchQ: string) => {
+    setIsLoading(true);
+    const response = await fetch(`${SWAPI_URL}?search=${searchQ}`);
+    const data = await response.json();
+    setCharacters(data.results);
+    setIsLoading(false);
+  };
+
+  const handleSearch = useCallback(
+    debounce((search: string) => fetchCharacters(search), 500),
+    []
+  );
+
+  useEffect(() => {
+    fetchCharacters("");
+  }, []);
+
+  return (
+    <div className="">
+      <div className="max-w-screen-xl mt-12 mx-auto">
+        <div className="flex flex-col">
+          <h1 className="text-3xl md:text-5xl font-semibold text-center">
+            Star Wars Characters
+          </h1>
+          <p className="text-center text-sm md:text-base mt-4 text-gray-500">
+            A list of Star Wars characters from the SWAPI.
+          </p>
+          <Input
+            type="search"
+            placeholder="Search..."
+            className="mt-4 w-[300px] mx-auto"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              handleSearch(e.target.value);
+            }}
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <div className="my-10 px-12 mx-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[200px]">Name</TableHead>
+                <TableHead>Height</TableHead>
+                <TableHead className="text-right">Birth Year</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading && (
+                <>
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Skeleton className="w-[200px] h-5" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="w-[200px] h-5" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="w-[200px] h-5 ml-auto" />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </>
+              )}
+              {!isLoading && characters.length > 0 && (
+                <>
+                  {characters?.map((data, index) => (
+                    <TableRow
+                      key={index}
+                      className={`border-gray-100 text-gray-700 ${
+                        index % 2 === 0 ? "bg-gray-" : ""
+                      }`}
+                    >
+                      <TableCell className="font-medium">{data.name}</TableCell>
+                      <TableCell>{data.height}</TableCell>
+                      <TableCell className="text-right">
+                        {data.birth_year === "unknown"
+                          ? "N/A"
+                          : data.birth_year}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </>
+              )}
+              {!isLoading && characters.length === 0 && (
+                <TableRow className="h-40 hover:bg-transparent">
+                  <TableCell colSpan={3} className="text-center text-gray-600">
+                    No characters found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
     </div>
   );
 }
